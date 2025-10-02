@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GL Hackathon — Clickable Wireframes (Single File)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* ===== GL Hackathon Wireframes — inline CSS ===== */
+:root{
+  --bg:#f7f7f7; --fg:#222; --muted:#666; --line:#ddd;
+  --brand:#0a66c2; --ok:#1a7f37; --warn:#a15a00; --danger:#b00020; --card:#fff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;color:var(--fg);background:var(--bg)}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+header.app{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.header-inner{display:flex;align-items:center;gap:16px;justify-content:space-between;padding:14px 24px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.brand .logo{width:28px;height:28px;border:2px solid var(--brand);border-radius:6px;display:inline-block}
+nav.top a{margin:0 10px;padding:8px 10px;border-radius:8px}
+nav.top a.active, nav.top a:hover{background:#eef5ff}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.ghost{background:transparent}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn.success{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.warn{background:var(--warn);border-color:var(--warn);color:#fff}
+.grid{display:grid;gap:16px}
+.grid.cols-2{grid-template-columns:repeat(2,1fr)}
+.grid.cols-3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:900px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.card.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.h1{font-size:28px;font-weight:700;margin:4px 0 8px}
+.h2{font-size:20px;font-weight:700;margin:0 0 8px}
+.h3{font-size:16px;font-weight:700;margin:16px 0 6px}
+.p{color:var(--muted)}
+.hero{padding:60px 0;text-align:center}
+/* center the hero buttons (updated) */
+.hero .cta{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.kpis{display:flex;gap:18px;justify-content:center;color:#333}
+.kpi{background:#fff;border:1px dashed var(--line);border-radius:10px;padding:10px 14px}
+footer.app{border-top:1px solid var(--line);padding:24px;margin-top:50px;color:var(--muted);text-align:center}
+input[type=text],input[type=email],input[type=password],input[type=datetime-local],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+label{font-weight:600;display:block;margin-top:10px}
+.help{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sep{border-top:1px dashed var(--line);margin:14px 0}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef5ff;color:#114c8c;font-size:12px;border:1px solid #d5e8ff}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:#eee;font-size:12px;margin-right:6px}
+.countdown{font-variant-numeric:tabular-nums;font-weight:700}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px solid var(--line);text-align:left;padding:10px}
+.toast{position:fixed;right:16px;bottom:16px;background:#111;color:#fff;padding:12px 14px;border-radius:10px;opacity:0;transform:translateY(8px);transition:.2s}
+.toast.show{opacity:1;transform:translateY(0)}
+.banner{background:#fff3cd;border:1px solid #ffe69c;padding:12px 14px;border-radius:10px}
+.banner.error{background:#fde7e9;border-color:#f5c2c7}
+.banner.ok{background:#e9f7ef;border-color:#c6f0d5}
+.tabs{display:flex;border-bottom:1px solid var(--line);gap:8px}
+.tabs a{padding:10px 12px;border-radius:10px 10px 0 0;border:1px solid transparent}
+.tabs a.active{border-color:var(--line);border-bottom-color:var(--card);background:#fff}
+.tab-panel{background:#fff;border:1px solid var(--line);border-top:none;border-radius:0 12px 12px 12px;padding:16px}
+.code{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
+.modal .panel{background:#fff;border-radius:12px;max-width:600px;width:100%;padding:16px;border:1px solid var(--line)}
+.hidden{display:none !important}
+ul.inline{display:flex;gap:8px;list-style:none;padding:0;margin:0}
+blockquote{border-left:3px solid var(--line);margin:10px 0;padding-left:10px;color:#555}
+</style>
+</head>
+<body>
+  <!-- Header / Global Nav -->
+  <header class="app">
+    <div class="header-inner">
+      <div class="brand"><span class="logo"></span> GL Hackathon</div>
+      <nav class="top">
+        <a href="#home" data-nav>Home</a>
+        <a href="#event-home" data-nav>Event</a>
+        <a href="#team-lobby" data-nav>Team</a>
+        <a href="#submission" data-nav>Submission</a>
+        <a href="#judge-landing" data-nav>Judges</a>
+        <a href="#admin-console" data-nav>Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ===== HOME ===== -->
+    <section data-route="home">
+      <section class="hero">
+        <div class="h1">Build something bold. 100 teams. 48 hours. Real prizes.</div>
+        <p class="p">Great Learning Online Hackathon — GL-branded, lightweight MVP.</p>
+        <div class="cta">
+          <a class="btn primary" href="#signin">Start / Sign in</a>
+          <a class="btn" href="#event-home">View Event Home</a>
+        </div>
+        <div class="kpis" style="margin-top:18px">
+          <div class="kpi"><b>Kickoff</b><br>Oct 18 • 18:00 IST</div>
+          <div class="kpi"><b>Deadline</b><br>Oct 20 • 21:00 IST</div>
+          <div class="kpi"><b>Prizes</b><br>Top 3 teams</div>
+        </div>
+      </section>
+      <div class="grid cols-3">
+        <div class="card">
+          <div class="h2">How it works</div>
+          <ol>
+            <li>Register and create/join a team</li>
+            <li>Build for 48 hours</li>
+            <li>Submit repo + 3-min demo</li>
+          </ol>
+        </div>
+        <div class="card">
+          <div class="h2">Prizes</div>
+          <p>Cash prizes for top 3. Honorable mentions highlighted.</p>
+        </div>
+        <div class="card">
+          <div class="h2">FAQs</div>
+          <p>Data science + software projects are allowed. See rules.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SIGNIN ===== -->
+    <section data-route="signin" class="hidden">
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="h2">Sign in</div>
+          <label><input type="radio" name="auth" checked> Email OTP</label>
+          <label><input type="radio" name="auth"> GL SSO</label>
+          <label>Email</label>
+          <input type="email" placeholder="you@example.com">
+          <div class="row"><button class="btn primary" onclick="toast('OTP sent')">Send code</button>
+          <a class="btn ghost" href="#profile">I already have a link →</a></div>
+          <div class="help">Use backup link if email is delayed.</div>
+        </div>
+        <div class="card">
+          <div class="h2">Why join?</div>
+          <p>Meet mentors, ship a project, and compete for prizes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROFILE ===== -->
+    <section data-route="profile" class="hidden">
+      <div class="card">
+        <div class="h2">Create your profile</div>
+        <div class="grid cols-2">
+          <div>
+            <label>Name</label><input type="text" placeholder="Full name">
+          </div>
+          <div>
+            <label>GL ID (optional)</label><input type="text" placeholder="GL-XXXX">
+          </div>
+        </div>
+        <label>Skills</label><input type="text" placeholder="Add skills as comma-separated">
+        <div class="grid cols-2">
+          <div>
+            <label>Track</label><select><option>General</option><option>Data</option><option>Web</option></select>
+          </div>
+          <div>
+            <label>Timezone</label><input type="text" value="Asia/Kolkata">
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <a class="btn" href="#team-setup">Save & Continue →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TEAM SETUP ===== -->
+    <section data-route="team-setup" class="hidden">
+      <div class="card">
+        <div class="h2">Team setup</div>
+        <label><input type="radio" name="t" checked> Create a new team</label>
+        <label><input type="radio" name="t"> Join with code/invite link</label>
+        <div class="row" style="margin-top:12px">
+          <a class="btn primary" href="#create-team">Continue →</a>
+          <a class="btn" href="#join-team">I have a code →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CREATE TEAM ===== -->
+    <section data-route="create-team" class="hidden">
+      <div class="card">
+        <div class="h2">Create team</div>
+        <label>Team name</label><input type="text" placeholder="Team Nova">
+        <div class="help">Team size: 2–4 members</div>
+        <div class="row" style="margin-top:12px">
+          <a class="btn primary" href="#team-lobby">Create team →</a>
+          <a class="btn ghost" href="#team-setup">Back</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== JOIN TEAM ===== -->
+    <section data-route="join-team" class="hidden">
+      <div class="card">
+        <div class="h2">Join a team</div>
+        <label>Enter 6-char code</label>
+        <input class="code" type="text" placeholder="ABC123" maxlength="6">
+        <div class="row" style="margin-top:12px">
+          <a class="btn primary" href="#team-lobby">Join team →</a>
+          <a class="btn" href="#create-team">Create new team</a>
+        </div>
+        <div class="banner error" style="margin-top:12px; display:none">Team full or code invalid.</div>
+      </div>
+    </section>
+
+    <!-- ===== TEAM LOBBY ===== -->
+    <section data-route="team-lobby" class="hidden">
+      <div id="lock-banner" class="banner" style="display:none">Team changes are locked. Contact support for exceptions.</div>
+      <div class="card header">
+        <div><b>Team "Nova"</b> <span class="tag">3/4</span></div>
+        <div class="row">
+          <label class="row"><input id="lock-toggle" type="checkbox" onchange="toggleLock()"> Lock team</label>
+          <a class="btn" href="#event-home">Event Home</a>
+          <a class="btn primary" href="#submission">Start submission</a>
+        </div>
+      </div>
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="h3">Invite teammates</div>
+          <div class="row"><span>Invite link</span> <code class="code">/join/ABC123</code> <button class="btn" onclick="toast('Copied')">Copy</button></div>
+          <div class="row"><span>Code</span> <code class="code">ABC123</code></div>
+          <div class="sep"></div>
+          <button class="btn lockable">Add member</button>
+          <button class="btn danger lockable">Leave team</button>
+        </div>
+        <div class="card">
+          <div class="h3">Members</div>
+          <ul>
+            <li>You (Lead) <button class="btn ghost lockable">Transfer lead</button></li>
+            <li>Priya</li>
+            <li>Aaron</li>
+          </ul>
+          <div class="sep"></div>
+          <a class="btn" href="#mentors">Join Slack / Book mentor</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EVENT HOME ===== -->
+    <section data-route="event-home" class="hidden">
+      <div class="card">
+        <div class="h2">Event Home</div>
+        <div class="banner" style="margin-top:6px">[Pinned] Backup intake will auto-open if traffic spikes near deadline.</div>
+        <div class="row" style="margin-top:10px">
+          <div>Deadline: Oct 20, 21:00 IST • <span class="countdown" id="cd1">Loading…</span></div>
+        </div>
+      </div>
+      <div class="tabs" style="margin-top:16px">
+        <a href="#event-home/overview">Overview</a>
+        <a href="#event-home/rules">Rules</a>
+        <a href="#event-home/schedule">Schedule</a>
+        <a href="#event-home/resources">Resources</a>
+        <a href="#event-home/announcements">Announcements</a>
+        <a href="#event-home/qa">Q&A</a>
+        <a href="#event-home/mentors">Mentors</a>
+      </div>
+      <div class="tab-panel">
+        <section id="tab-overview" class="tab-section">
+          <div class="grid cols-3">
+            <div class="card"><div class="h3">Team</div><p>Nova (3/4)</p><a class="btn" href="#team-lobby">Team lobby</a></div>
+            <div class="card"><div class="h3">Submission</div><p>Status: Not started</p><a class="btn primary" href="#submission">Start submission</a></div>
+            <div class="card"><div class="h3">Support</div><p>See Q&A or mentor hours.</p><a class="btn" href="#event-home/qa">Ask a question</a></div>
+          </div>
+        </section>
+        <section id="tab-rules" class="tab-section hidden">
+          <div class="h3">Key rules</div>
+          <ul><li>Be kind</li><li>Be original</li><li>Ship by the deadline</li></ul>
+        </section>
+        <section id="tab-schedule" class="tab-section hidden">
+          <table class="table">
+            <tr><th>When</th><th>What</th></tr>
+            <tr><td>Oct 18, 18:00</td><td>Kickoff</td></tr>
+            <tr><td>Oct 19</td><td>Mentor hours</td></tr>
+            <tr><td>Oct 20, 21:00</td><td>Submission deadline</td></tr>
+          </table>
+        </section>
+        <section id="tab-resources" class="tab-section hidden">
+          <ul>
+            <li><a href="#">Challenge brief</a></li>
+            <li><a href="#">Dataset</a></li>
+            <li><a href="#">Starter repo</a></li>
+            <li><a href="#">README template</a></li>
+          </ul>
+        </section>
+        <section id="tab-announcements" class="tab-section hidden">
+          <div class="card"><b>12:10</b> – Backup intake will auto-open if traffic spikes near deadline. <span class="tag">Pinned</span></div>
+          <div class="card"><b>11:00</b> – Mentor hours open. Book early.</div>
+        </section>
+        <section id="tab-qa" class="tab-section hidden">
+          <div class="grid cols-2">
+            <div class="card">
+              <div class="row"><input type="text" placeholder="Search questions…"><button class="btn">Search</button></div>
+              <div class="sep"></div>
+              <div class="card"><b>Is external API X allowed?</b> <span class="tag">Rules</span><blockquote>Yes, within rate limits.</blockquote></div>
+              <div class="card"><b>Dataset format?</b> <span class="tag">Data</span><blockquote>CSV with headers.</blockquote></div>
+            </div>
+            <div class="card">
+              <div class="h3">Ask a question</div>
+              <label>Title</label><input type="text">
+              <label>Body</label><textarea rows="4"></textarea>
+              <label>Tags</label><input type="text" placeholder="rules, data">
+              <button class="btn primary" onclick="toast('Question posted')">Post</button>
+              <div class="help">SLA: 30 mins during prime time.</div>
+            </div>
+          </div>
+        </section>
+        <section id="tab-mentors" class="tab-section hidden">
+          <div class="grid cols-2">
+            <div class="card"><div class="h3">Book a slot</div><p>Calendly embed placeholder</p><button class="btn">Open Calendly</button></div>
+            <div class="card"><div class="h3">Live queue</div><p>Estimated wait: 10–15 mins</p><button class="btn warn">Join queue</button></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ===== MENTORS DIRECT ===== -->
+    <section data-route="mentors" class="hidden">
+      <div class="grid cols-2">
+        <div class="card"><div class="h2">Book a slot</div><p>Calendly placeholder</p><button class="btn">Open Calendly</button></div>
+        <div class="card"><div class="h2">Live queue</div><p>Estimated wait: 10–15 mins</p><button class="btn warn">Join queue</button></div>
+      </div>
+    </section>
+
+    <!-- ===== SUBMISSION ===== -->
+    <section data-route="submission" class="hidden">
+      <div class="card header">
+        <div><b>Submission</b> • Due Oct 20, 21:00 IST • <span class="countdown" id="cd2">Loading…</span></div>
+        <div class="row">
+          <button class="btn" onclick="toast('Pre-flight reminder sent')">Pre-flight reminder</button>
+          <a class="btn" href="#team-lobby">Team Lobby</a>
+        </div>
+      </div>
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="h3">Checklist</div>
+          <label>Repo URL</label><input type="text" placeholder="https://github.com/...">
+          <label>ZIP Upload (optional)</label><input type="file">
+          <label>Demo video (≤3 min)</label><input type="text" placeholder="https://...">
+          <label>Slides (optional)</label><input type="file">
+          <label>Declaration & Category</label>
+          <div class="row"><label><input type="checkbox"> Original work</label>
+          <select><option>General</option><option>Data</option><option>Web</option></select></div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn" onclick="runPreflight()">Run Pre-flight</button>
+            <a class="btn success" href="#submission-success">Submit</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="h3">Pre-flight results</div>
+          <div id="preflight-results" class="p">Run the pre-flight to validate links and files.</div>
+        </div>
+      </div>
+      <div class="banner" style="margin-top:12px">
+        Heavy traffic? Backup intake will open automatically for 15 minutes if errors occur.
+      </div>
+    </section>
+
+    <!-- ===== SUBMISSION SUCCESS ===== -->
+    <section data-route="submission-success" class="hidden">
+      <div class="card">
+        <div class="h2">Success 🎉</div>
+        <p>Submitted at 20:43 IST • Receipt hash: <code class="code">7F3C-9A-B2</code> (emailed to team)</p>
+        <div class="row">
+          <a class="btn" href="#submission">Edit / Resubmit (until lock)</a>
+          <a class="btn" href="#event-home">Back to Event Home</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== BACKUP INTAKE ===== -->
+    <section data-route="backup-intake" class="hidden">
+      <div class="card">
+        <div class="h2">Backup Intake (15 min)</div>
+        <label>Team code</label><input type="text" value="ABC123">
+        <label>Repo URL</label><input type="text">
+        <label>ZIP Upload</label><input type="file">
+        <label>Video URL</label><input type="text">
+        <label><input type="checkbox"> Declaration</label>
+        <div class="row" style="margin-top:12px">
+          <a class="btn primary" href="#submission-success">Submit</a>
+          <span class="help">This form closes in 12:34</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== JUDGE LANDING ===== -->
+    <section data-route="judge-landing" class="hidden">
+      <div class="card header">
+        <div><b>Welcome, Judge Patel</b></div>
+        <div class="row"><a class="btn primary" href="#judge-assignments">Start next</a></div>
+      </div>
+      <div class="grid cols-3" style="margin-top:12px">
+        <div class="card"><div class="h3">Assignments</div><p>8 total • 0 completed</p><a class="btn" href="#judge-assignments">View all</a></div>
+        <div class="card"><div class="h3">Guidelines</div><p>Score fairly. Notes for 1–2⭐ or 5⭐.</p></div>
+        <div class="card"><div class="h3">Exports</div><a class="btn" href="#">Download my notes</a></div>
+      </div>
+    </section>
+
+    <!-- ===== JUDGE ASSIGNMENTS ===== -->
+    <section data-route="judge-assignments" class="hidden">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div class="h2">Your assignments</div>
+          <div class="row">
+            <select><option>All tracks</option></select>
+            <select><option>Status: All</option><option>Not started</option><option>In progress</option><option>Done</option></select>
+          </div>
+        </div>
+        <div class="grid cols-2" style="margin-top:12px">
+          <div class="card"><b>Team Nova</b> <span class="tag">Track A</span><div class="row"><a class="btn" href="#judge-review">Open</a><a class="btn" href="#">README</a><a class="btn" href="#">Repo</a><a class="btn" href="#">Video</a></div></div>
+          <div class="card"><b>Team Orion</b> <span class="tag">Track B</span><div class="row"><a class="btn" href="#judge-review">Open</a><a class="btn" href="#">README</a><a class="btn" href="#">Repo</a><a class="btn" href="#">Video</a></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== JUDGE REVIEW ===== -->
+    <section data-route="judge-review" class="hidden">
+      <div class="banner hidden" id="conflict-banner">Potential conflict (same domain). Please return this assignment.</div>
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="h3">Team Nova • Submission</div>
+          <ul class="inline">
+            <li><a href="#">README</a></li>
+            <li><a href="#">Repo</a></li>
+            <li><a href="#">Video</a></li>
+            <li><a href="#">ZIP</a></li>
+            <li><a href="#">Slides</a></li>
+          </ul>
+          <div class="sep"></div>
+          <p class="p">README content placeholder…</p>
+          <button class="btn ghost" onclick="document.getElementById('conflict-banner').classList.remove('hidden')">Simulate conflict</button>
+        </div>
+        <div class="card">
+          <div class="h3">Rubric</div>
+          <label>Innovation (25%)</label><input id="innovation" type="range" min="1" max="5" step="1" value="3" oninput="onRubricChange(this)">
+          <label>Impact (25%)</label><input id="impact" type="range" min="1" max="5" step="1" value="3" oninput="onRubricChange(this)">
+          <label>Technical depth (25%)</label><input id="technical" type="range" min="1" max="5" step="1" value="3" oninput="onRubricChange(this)">
+          <label>Feasibility (15%)</label><input id="feasibility" type="range" min="1" max="5" step="1" value="3" oninput="onRubricChange(this)">
+          <label>Presentation (10%)</label><input id="presentation" type="range" min="1" max="5" step="1" value="3" oninput="onRubricChange(this)">
+          <div class="row"><b>Total:</b> <span id="total-score">3.00</span></div>
+          <label>Comments</label><textarea rows="4" placeholder="Add short justification for extreme ratings."></textarea>
+          <div class="row" style="margin-top:12px">
+            <a class="btn" href="#judge-assignments">Save</a>
+            <a class="btn success" href="#judge-assignments">Submit review</a>
+            <a class="btn warn" href="#judge-assignments">Return & Reassign</a>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="extreme-modal">
+        <div class="panel">
+          <div class="h3">Extreme rating</div>
+          <p>Please add a short justification for any 1–2⭐ or 5⭐ rating.</p>
+          <div class="row"><button class="btn primary" onclick="closeModal('extreme-modal')">OK</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN CONSOLE ===== -->
+    <section data-route="admin-console" class="hidden">
+      <div class="card header">
+        <div class="h2">Admin Console</div>
+        <div class="row">
+          <a class="btn" href="#admin-configure">Configure</a>
+          <a class="btn" href="#admin-announcements">Announcements</a>
+          <a class="btn" href="#admin-teams">Teams</a>
+          <a class="btn" href="#admin-judging">Judging</a>
+          <a class="btn" href="#admin-submissions">Submissions</a>
+          <a class="btn" href="#admin-freeze">Freeze</a>
+          <a class="btn" href="#admin-results">Results</a>
+          <a class="btn" href="#admin-exports">Exports</a>
+        </div>
+      </div>
+      <div class="grid cols-3" style="margin-top:12px">
+        <div class="card"><div class="h3">Funnel</div><p>Visitors → Registered → In team → Kickoff</p></div>
+        <div class="card"><div class="h3">Submission velocity</div><input id="velocity" type="range" min="0" max="100" value="20"><div class="row"><button class="btn" onclick="bumpVelocity()">Simulate surge</button></div></div>
+        <div class="card"><div class="h3">Q&A SLA</div><p>90% within 30 minutes</p></div>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN CONFIGURE ===== -->
+    <section data-route="admin-configure" class="hidden">
+      <div class="card">
+        <div class="h2">Configure Event</div>
+        <div class="grid cols-2">
+          <div><label>Kickoff</label><input type="datetime-local"></div>
+          <div><label>Deadline</label><input type="datetime-local"></div>
+        </div>
+        <label>Lock offset</label><input type="text" placeholder="12h">
+        <label>Rubric weights</label><input type="text" value="25/25/25/15/10">
+        <label>Slack workspace URL</label><input type="text" placeholder="https://...">
+        <div class="row" style="margin-top:12px"><button class="btn primary" onclick="toast('Config saved')">Save config</button><a class="btn" href="#home">Preview public pages</a></div>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN ANNOUNCEMENTS ===== -->
+    <section data-route="admin-announcements" class="hidden">
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="h2">Compose announcement</div>
+          <label>Title</label><input type="text">
+          <label>Body</label><textarea rows="6"></textarea>
+          <div class="row"><label><input type="checkbox" checked> Pin</label><label><input type="checkbox" checked> Email</label><label><input type="checkbox" checked> Slack</label></div>
+          <div class="row" style="margin-top:12px"><button class="btn primary" onclick="toast('Announcement published')">Publish now</button></div>
+        </div>
+        <div class="card">
+          <div class="h2">Recent</div>
+          <div class="card"><b>12:10</b> Backup intake auto-open. <span class="tag">Pinned</span></div>
+          <div class="card"><b>11:00</b> Mentor hours open.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN TEAMS ===== -->
+    <section data-route="admin-teams" class="hidden">
+      <div class="card">
+        <div class="h2">Teams</div>
+        <table class="table">
+          <tr><th>Team</th><th>Members</th><th>Locked?</th><th>Actions</th></tr>
+          <tr><td>Nova</td><td>3</td><td>No</td><td><a class="btn" href="#team-lobby">Impersonate</a> <button class="btn">Lock</button></td></tr>
+          <tr><td>Orion</td><td>4</td><td>Yes</td><td><button class="btn">Unlock</button></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN JUDGING ===== -->
+    <section data-route="admin-judging" class="hidden">
+      <div class="card">
+        <div class="h2">Judge Assignment</div>
+        <label>Import judges (CSV)</label><input type="file">
+        <label>Conflict rules (domains)</label><input type="text" placeholder="company.com, gl.com">
+        <label>Target reviews/submission</label><input type="text" value="2">
+        <div class="row" style="margin-top:12px"><button class="btn" onclick="toast('Plan generated: balanced ✓')">Generate plan</button><button class="btn primary" onclick="toast('Assignments applied')">Assign</button></div>
+        <div class="sep"></div>
+        <p class="p">Preview matrix placeholder…</p>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN SUBMISSIONS ===== -->
+    <section data-route="admin-submissions" class="hidden">
+      <div class="card">
+        <div class="h2">Submissions Monitor</div>
+        <p>Cumulative by hour (placeholder)</p>
+        <div class="row">
+          <button class="btn warn" onclick="toast('Simulating load...')">Simulate surge test</button>
+          <a class="btn" href="#backup-intake">Open backup intake</a>
+        </div>
+        <div class="sep"></div>
+        <table class="table">
+          <tr><th>Team</th><th>Status</th><th>Pre-flight</th><th>Final?</th></tr>
+          <tr><td>Nova</td><td>Final</td><td>Pass</td><td>Yes</td></tr>
+          <tr><td>Orion</td><td>Draft</td><td>Fail</td><td>No</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN FREEZE ===== -->
+    <section data-route="admin-freeze" class="hidden">
+      <div class="card">
+        <div class="h2">Freeze & Snapshot</div>
+        <p>Freezing submissions will snapshot data to Drive and email receipts.</p>
+        <div class="row"><button class="btn danger" onclick="toast('Frozen & snapshot complete')">Freeze now</button></div>
+        <div class="sep"></div>
+        <p>Exports:</p>
+        <ul>
+          <li><a href="#">CSV (scores)</a></li>
+          <li><a href="#">JSON (submissions)</a></li>
+          <li><a href="#">Audit log</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN RESULTS ===== -->
+    <section data-route="admin-results" class="hidden">
+      <div class="card">
+        <div class="h2">Provisional Leaderboard</div>
+        <table class="table">
+          <tr><th>Rank</th><th>Team</th><th>Weighted score</th><th>Variance σ</th><th>Actions</th></tr>
+          <tr><td>1</td><td>Nova</td><td>4.62</td><td>0.21</td><td><a class="btn" href="#admin-results">Open tie-break</a></td></tr>
+          <tr><td>2</td><td>Orion</td><td>4.60</td><td>0.22</td><td><a class="btn" href="#admin-results">Open tie-break</a></td></tr>
+          <tr><td>3</td><td>Atlas</td><td>4.44</td><td>0.18</td><td></td></tr>
+        </table>
+        <div class="row" style="margin-top:12px">
+          <a class="btn success" href="#winners">Publish winners</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WINNERS (PUBLIC) ===== -->
+    <section data-route="winners" class="hidden">
+      <div class="card">
+        <div class="h2">🏆 Winners</div>
+        <ol>
+          <li><b>Team Nova</b> — “Smart Health” <blockquote>Innovative & high impact.</blockquote></li>
+          <li><b>Team Orion</b> — “GreenRoute” <blockquote>Great feasibility.</blockquote></li>
+          <li><b>Team Atlas</b> — “FinLens” <blockquote>Strong technical depth.</blockquote></li>
+        </ol>
+        <div class="sep"></div>
+        <p>Honorable mentions: Vega, Helios</p>
+        <div class="row"><a class="btn" href="#home">Back to Home</a></div>
+      </div>
+    </section>
+
+    <!-- ===== ADMIN EXPORTS ===== -->
+    <section data-route="admin-exports" class="hidden">
+      <div class="card">
+        <div class="h2">Exports & Audit</div>
+        <ul>
+          <li><a href="#">CSV: reviews</a></li>
+          <li><a href="#">CSV: final scores</a></li>
+          <li><a href="#">Audit log (immutable)</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app">Wireframe kit • Single-file HTML (hash-routed)</footer>
+  <div class="toast" aria-live="polite"></div>
+
+<script>
+/* ===== Inline JS: lightweight router + interactions ===== */
+const $ = (sel, root=document)=>root.querySelector(sel);
+const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
+function toast(msg){
+  let t = $('.toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+// Router: #route or #event-home/subtab
+function showRoute(route){
+  const [base, sub] = route.split('/');
+  $$('section[data-route]').forEach(sec => sec.classList.toggle('hidden', sec.getAttribute('data-route')!==base));
+  // Top nav active
+  $$('nav.top a[data-nav]').forEach(a=>{
+    const r = a.getAttribute('href').replace('#','');
+    a.classList.toggle('active', r===base);
+  });
+  // Event home tabs if in event-home
+  if(base==='event-home'){
+    initEventTabs(sub||'overview');
+  }
+  // Start countdowns on first entry
+  if(base==='event-home'){ startCountdown('cd1', 3600); }
+  if(base==='submission'){ startCountdown('cd2', 7200); }
+}
+function onHashChange(){
+  let hash = location.hash || '#home';
+  showRoute(hash.replace('#',''));
+}
+window.addEventListener('hashchange', onHashChange);
+document.addEventListener('DOMContentLoaded', onHashChange);
+
+// Event-home tabs
+function initEventTabs(id){
+  const map = {overview:'tab-overview',rules:'tab-rules',schedule:'tab-schedule',resources:'tab-resources',announcements:'tab-announcements',qa:'tab-qa',mentors:'tab-mentors'};
+  Object.values(map).forEach(el=>document.getElementById(el).classList.add('hidden'));
+  const chosen = map[id] || map.overview;
+  document.getElementById(chosen).classList.remove('hidden');
+  // update tab active state
+  const base = 'event-home';
+  const tabLinks = $$('.tabs a');
+  tabLinks.forEach(a=>{
+    const href = a.getAttribute('href'); // like #event-home/qa
+    a.classList.toggle('active', href === `#${base}/${id}`);
+    a.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = `${base}/${a.textContent.toLowerCase()}`; });
+  });
+}
+
+// Small helpers
+function startCountdown(id, seconds){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(el.dataset.running){ return; }
+  el.dataset.running = '1';
+  let s = seconds;
+  function tick(){
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    if(s>0){ s--; setTimeout(tick,1000); }
+  }
+  tick();
+}
+function runPreflight(){
+  const results = $('#preflight-results');
+  results.innerHTML = `
+    <div class="row"><span class="badge">Link reachability</span> <b>PASS</b></div>
+    <div class="row"><span class="badge">File size</span> <b>PASS</b></div>
+    <div class="row"><span class="badge">README template</span> <b>✖ Missing 'How to run'</b></div>
+    <div class="row"><span class="badge">Video privacy</span> <b>✖ Private</b></div>
+    <div class="help">Fix hints: Add 'How to run' section; set video to Unlisted.</div>
+  `;
+  toast("Pre-flight completed");
+}
+function toggleLock(){
+  const locked = document.getElementById('lock-toggle').checked;
+  const banner = document.getElementById('lock-banner');
+  if(banner){ banner.style.display = locked ? 'block' : 'none'; }
+  $$('.lockable').forEach(el=>el.disabled = locked);
+  toast(locked ? 'Team locked' : 'Team unlocked');
+}
+function onRubricChange(inp){
+  const v = Number(inp.value);
+  if(v<=2 || v>=5) openModal('extreme-modal');
+  const weights = {innovation:.25, impact:.25, technical:.25, feasibility:.15, presentation:.10};
+  const total = ['innovation','impact','technical','feasibility','presentation']
+    .map(id => Number(document.getElementById(id)?.value||0)*weights[id])
+    .reduce((a,b)=>a+b,0);
+  const out = document.getElementById('total-score');
+  if(out) out.textContent = total.toFixed(2);
+}
+function bumpVelocity(){
+  const v = document.getElementById('velocity');
+  if(v) v.value = Math.min(100, Number(v.value||0)+10);
+}
+// Modal
+function openModal(id){ const m = document.getElementById(id); if(m) m.style.display='flex'; }
+function closeModal(id){ const m = document.getElementById(id); if(m) m.style.display='none'; }
+</script>
+</body>
+</html>
